@@ -32,15 +32,21 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Install pipenv
         run: pip3 install --user pipenv
-      - name: Install dependecies
+      - name: Install dependencies
         run: pipenv --python 3.13 && pipenv install --deploy
       - name: Update with user config
         run: |
-          # 使用用户配置文件
-          sed -i 's/source_file = config\/demo.txt/source_file = config\/user_demo.txt/' config/config.ini
-          sed -i 's/final_file = output\/result.txt/final_file = output\/user_result.txt/' config/config.ini
-          # 合并用户配置到主配置
+          # 合并用户配置到主配置（使用sed替换已存在的选项）
           if [ -f config/user_config.ini ]; then
+            # 删除默认的source_file和final_file行
+            sed -i '/^source_file = /d' config/config.ini
+            sed -i '/^final_file = /d' config/config.ini
+            sed -i '/^open_speed_test = /d' config/config.ini
+            sed -i '/^open_filter_speed = /d' config/config.ini
+            sed -i '/^open_update_time = /d' config/config.ini
+            sed -i '/^update_time_position = /d' config/config.ini
+            sed -i '/^language = /d' config/config.ini
+            # 追加用户配置
             cat config/user_config.ini >> config/config.ini
           fi
           pipenv run dev
