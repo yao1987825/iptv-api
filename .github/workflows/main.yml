@@ -8,8 +8,9 @@ on:
       - master
       - dev
       - gd
+
 jobs:
-  push:
+  update:
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
@@ -33,8 +34,16 @@ jobs:
         run: pip3 install --user pipenv
       - name: Install dependecies
         run: pipenv --python 3.13 && pipenv install --deploy
-      - name: Update
-        run: pipenv run dev
+      - name: Update with user config
+        run: |
+          # 使用用户配置文件
+          sed -i 's/source_file = config\/demo.txt/source_file = config\/user_demo.txt/' config/config.ini
+          sed -i 's/final_file = output\/result.txt/final_file = output\/user_result.txt/' config/config.ini
+          # 合并用户配置到主配置
+          if [ -f config/user_config.ini ]; then
+            cat config/user_config.ini >> config/config.ini
+          fi
+          pipenv run dev
       - name: Commit and push if changed
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
